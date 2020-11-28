@@ -10,8 +10,8 @@ import SpriteKit
 
 class GameScene: SKScene
 {
-    var topBoundary: SKShapeNode!
-    var bottomBoundary: SKShapeNode!
+    var topBoundary: SKSpriteNode!
+    var bottomBoundary: SKSpriteNode!
     
     var gameTimer: Timer?
     var difficultyTimer: Timer?
@@ -24,11 +24,13 @@ class GameScene: SKScene
     var impulse: CGVector!
     
     var playerLives: Int = 3
-    let livesLabel = SKLabelNode(text: "0")
+    let livesLabel = SKLabelNode(text: "Lives: 3")
     
     var score: Int = 0
-    let scoreLabel = SKLabelNode(text: "0")
+    let scoreLabel = SKLabelNode(text: "Score: 0")
     var enemyPoints: Int = 10
+    
+    var font: String = "AvenirNext-Bold"
     
     override func didMove(to view: SKView)
     {
@@ -44,17 +46,22 @@ class GameScene: SKScene
     
     func createBoundaries()
     {
-        let top: CGRect = CGRect(x: frame.minX, y: frame.maxY + 2, width: frame.width, height: 1)
-        topBoundary = SKShapeNode(rect: top)
-        topBoundary.physicsBody = SKPhysicsBody(edgeLoopFrom: top)
+        //let top = CGRect(x: frame.minX, y: frame.maxY + 2, width: frame.width, height: 1)
+        topBoundary = SKSpriteNode(imageNamed: "boundary copy")
+        topBoundary.size = CGSize(width: frame.width, height: 10)
+        topBoundary.position = CGPoint(x: frame.midX, y: frame.maxY + (chickenSize * 2))
+        topBoundary.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: topBoundary.size.width, height: topBoundary.size.height))
         topBoundary.physicsBody?.categoryBitMask = PhysicsCategories.boundaryCategory
         topBoundary.physicsBody?.isDynamic = false
+        addChild(topBoundary)
         
-        let bottom: CGRect = CGRect(x: frame.minX, y: frame.minY - 2, width: frame.width, height: 1)
-        bottomBoundary = SKShapeNode(rect: bottom)
-        bottomBoundary.physicsBody = SKPhysicsBody(edgeLoopFrom: bottom)
+        bottomBoundary = SKSpriteNode(imageNamed: "boundary copy")
+        bottomBoundary.size = CGSize(width: frame.width, height: 10)
+        bottomBoundary.position = CGPoint(x: frame.midX, y: frame.minY - chickenSize)
+        bottomBoundary.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: bottomBoundary.size.width, height: bottomBoundary.size.height))
         bottomBoundary.physicsBody?.categoryBitMask = PhysicsCategories.boundaryCategory
         bottomBoundary.physicsBody?.isDynamic = false
+        addChild(bottomBoundary)
     }
     
     @objc func increaseDifficulty() // Increases enemy spawn rate every x seconds
@@ -71,29 +78,24 @@ class GameScene: SKScene
         projectileSize = frame.size.width/7
         backgroundColor = UIColor(red: 44/255, green: 62/255, blue: 80/255, alpha: 1.0)
         
-        createBoundaries()
-        createLabels()
+        createBoundaries() // Destroys projectiles and enemies once off screen
+        
+        createLabel(label: livesLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.minX + 70, y: frame.maxY - 50))
+        createLabel(label: scoreLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.maxX - 70, y: frame.maxY - 50))
+        
         createPlayer()
         
         increaseDifficulty()
         difficultyTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
     }
     
-    func createLabels()
+    func createLabel(label: SKLabelNode, size: CGFloat, color: UIColor, pos: CGPoint)
     {
-        livesLabel.fontName = "AvenirNext-Bold"
-        livesLabel.fontSize = 20.0
-        livesLabel.fontColor = UIColor.white
-        livesLabel.position = CGPoint(x: frame.minX + 50, y: frame.maxY - 50)
-        addChild(livesLabel)
-        updateLivesLabel()
-        
-        scoreLabel.fontName = "AvenirNext-Bold"
-        scoreLabel.fontSize = 20.0
-        scoreLabel.fontColor = UIColor.white
-        scoreLabel.position = CGPoint(x: frame.maxX - 50, y: frame.maxY - 50)
-        addChild(scoreLabel)
-        updateScoreLabel(addScore: 0)
+        label.fontName = font
+        label.fontSize = size
+        label.fontColor = color
+        label.position = pos
+        addChild(label)
     }
     
     func createPlayer()
@@ -116,11 +118,11 @@ class GameScene: SKScene
         enemy.size = CGSize(width: chickenSize, height: chickenSize)
         
         let randomPos = CGFloat.random(in: frame.minX + enemy.size.width/2 ... frame.maxX - enemy.size.width/2)
-        enemy.position = CGPoint(x: randomPos, y: frame.maxY + chickenSize) // spawns jsut off screen
+        enemy.position = CGPoint(x: randomPos, y: frame.maxY + chickenSize) // spawns just off screen
         
         enemy.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
         enemy.physicsBody?.categoryBitMask = PhysicsCategories.enemyCategory
-        enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory
+        enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory | PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
         enemy.physicsBody?.collisionBitMask = PhysicsCategories.none
         
         addChild(enemy)
@@ -134,23 +136,14 @@ class GameScene: SKScene
         
         projectile.physicsBody = SKPhysicsBody(circleOfRadius: projectileSize/2)
         projectile.physicsBody?.categoryBitMask = PhysicsCategories.projectileCategory
-        projectile.physicsBody?.contactTestBitMask = PhysicsCategories.enemyCategory
-        projectile.physicsBody?.collisionBitMask = PhysicsCategories.none
+        projectile.physicsBody?.contactTestBitMask = PhysicsCategories.enemyCategory | PhysicsCategories.boundaryCategory
         projectile.physicsBody?.affectedByGravity = false // goes up screen rather than down
         
         addChild(projectile)
         
         impulse = CGVector(dx: 0, dy: 60)
         projectile.physicsBody?.applyImpulse(impulse)
-        
-        /*var projTimer: Timer?
-        projTimer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(despawnProjectile(proj:)), userInfo: projectile, repeats: false)*/
     }
-    
-    /*@objc func despawnProjectile(proj: SKSpriteNode)
-    {
-        proj.removeFromParent()
-    }*/
     
     func enemyCollision()
     {
@@ -214,9 +207,15 @@ extension GameScene: SKPhysicsContactDelegate
             
             enemyCured() // add points
         }
-        else if contactMask == PhysicsCategories.projectileCategory | PhysicsCategories.boundaryCategory
+        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
         {
-            contact.bodyA.node?.removeFromParent()
+            print ("PROJECTILE OFF SCREEN")
+            contact.bodyB.node?.removeFromParent()
+        }
+        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.enemyCategory
+        {
+            print ("ENEMY OFF SCREEN")
+            contact.bodyB.node?.removeFromParent()
         }
     }
 }
