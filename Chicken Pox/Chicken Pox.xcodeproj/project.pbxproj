@@ -15,7 +15,7 @@
 		412021FB255FF410008FBB3E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 412021F9255FF410008FBB3E /* LaunchScreen.storyboard */; };
 		41202206255FF410008FBB3E /* Chicken_PoxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41202205255FF410008FBB3E /* Chicken_PoxTests.swift */; };
 		41202211255FF411008FBB3E /* Chicken_PoxUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41202210255FF411008FBB3E /* Chicken_PoxUITests.swift */; };
-		417EFD9B25726E65003E7C41 /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417EFD9A25726E65003E7C41 /* MenuScene.swift */; };
+		41CF2327257BB9AA009395EA /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CF2326257BB9AA009395EA /* MenuScene.swift */; };
 		41E4FA8E256191C60087F4A9 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E4FA8D256191C60087F4A9 /* Settings.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,7 +51,7 @@
 		4120220C255FF411008FBB3E /* Chicken PoxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Chicken PoxUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		41202210255FF411008FBB3E /* Chicken_PoxUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chicken_PoxUITests.swift; sourceTree = "<group>"; };
 		41202212255FF411008FBB3E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		417EFD9A25726E65003E7C41 /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
+		41CF2326257BB9AA009395EA /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
 		41E4FA8D256191C60087F4A9 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -142,8 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				412021F0255FF40E008FBB3E /* GameScene.swift */,
-				41E4FA8D256191C60087F4A9 /* Settings.swift */,
-				417EFD9A25726E65003E7C41 /* MenuScene.swift */,
+				41CF2326257BB9AA009395EA /* MenuScene.swift */,
 			);
 			path = Scenes;
 			sourceTree = "<group>";
@@ -151,6 +150,7 @@
 		41202220255FF7E5008FBB3E /* Template */ = {
 			isa = PBXGroup;
 			children = (
+				41E4FA8D256191C60087F4A9 /* Settings.swift */,
 				412021EA255FF40E008FBB3E /* AppDelegate.swift */,
 			);
 			path = Template;
@@ -299,7 +299,7 @@
 			files = (
 				412021F1255FF40E008FBB3E /* GameScene.swift in Sources */,
 				412021F3255FF40E008FBB3E /* GameViewController.swift in Sources */,
-				417EFD9B25726E65003E7C41 /* MenuScene.swift in Sources */,
+				41CF2327257BB9AA009395EA /* MenuScene.swift in Sources */,
 				41E4FA8E256191C60087F4A9 /* Settings.swift in Sources */,
 				412021EB255FF40E008FBB3E /* AppDelegate.swift in Sources */,
 			);

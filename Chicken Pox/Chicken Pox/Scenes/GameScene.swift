@@ -100,7 +100,7 @@ class GameScene: SKScene
     
     func createPlayer()
     {
-        player = SKSpriteNode(imageNamed: "player")
+        player = SKSpriteNode(imageNamed: "player-1")
         player.size = CGSize(width: chickenSize, height: chickenSize)
         player.position = CGPoint(x: frame.midX, y: frame.minY + chickenSize)
         
@@ -114,7 +114,7 @@ class GameScene: SKScene
     
     @objc func spawnEnemy()
     {
-        let enemy = SKSpriteNode(imageNamed: "enemy")
+        let enemy = SKSpriteNode(imageNamed: "zombie")
         enemy.size = CGSize(width: chickenSize, height: chickenSize)
         
         let randomPos = CGFloat.random(in: frame.minX + enemy.size.width/2 ... frame.maxX - enemy.size.width/2)
@@ -128,9 +128,9 @@ class GameScene: SKScene
         addChild(enemy)
     }
     
-    func spawnProjectile()
+    func spawnProjectile() // Should limit how many can be fired in a time frame?
     {
-        let projectile = SKSpriteNode(imageNamed: "cure")
+        let projectile = SKSpriteNode(imageNamed: "cure-5")
         projectile.size = CGSize(width: projectileSize, height: projectileSize)
         projectile.position = player.position
         
@@ -153,7 +153,7 @@ class GameScene: SKScene
         
         if playerLives == 0
         {
-            print ("GAME OVER")
+            gameOver()
         }
     }
     
@@ -186,6 +186,18 @@ class GameScene: SKScene
     {
         score += addScore
         scoreLabel.text = "Score: \(score)"
+    }
+    
+    func gameOver()
+    {
+        UserDefaults.standard.set(score, forKey: "LastScore")
+        if score > UserDefaults.standard.integer(forKey: "Highscore")
+        {
+            UserDefaults.standard.set(score, forKey: "Highscore")
+        }
+        
+        let menuScene = MenuScene(size: view!.bounds.size)
+        view!.presentScene(menuScene)
     }
 }
 

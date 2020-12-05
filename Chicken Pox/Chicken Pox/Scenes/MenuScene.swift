@@ -2,7 +2,7 @@
 //  MenuScene.swift
 //  Chicken Pox
 //
-//  Created by PORRITT, FRAN (Student) on 28/11/2020.
+//  Created by PORRITT, FRAN (Student) on 05/12/2020.
 //  Copyright © 2020 PORRITT, FRAN (Student). All rights reserved.
 //
 
@@ -10,8 +10,44 @@ import SpriteKit
 
 class MenuScene: SKScene
 {
+    let titleLabel = SKLabelNode(text: "CHICKEN POX")
+    let playLabel = SKLabelNode(text: "Tap to play!")
+    let lastScoreLabel = SKLabelNode(text: "Last score: " + "\(UserDefaults.standard.integer(forKey: "LastScore"))")
+    let highscoreLabel = SKLabelNode(text: "Highscore: " + "\(UserDefaults.standard.integer(forKey: "Highscore"))")
+    var font: String = "AvenirNext-Bold"
+    
     override func didMove(to view: SKView)
     {
         backgroundColor = UIColor(red: 44/255, green: 62/255, blue: 80/255, alpha: 1.0)
+        
+        addLogo()
+        
+        createLabel(label: titleLabel, size: 47.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.maxY - titleLabel.frame.size.height * 4))
+        createLabel(label: playLabel, size: 40.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.minY + playLabel.frame.size.height * 6))
+        createLabel(label: lastScoreLabel, size: 30.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.minY + lastScoreLabel.frame.size.height * 4))
+        createLabel(label: highscoreLabel, size: 30.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.minY + highscoreLabel.frame.size.height * 2))
+    }
+    
+    func addLogo()
+    {
+        let logo = SKSpriteNode(imageNamed: "chicklogo")
+        logo.size = CGSize(width: frame.width/2, height: frame.width/2)
+        logo.position = CGPoint(x: frame.midX, y: frame.midY + 20)        
+        addChild(logo)
+    }
+    
+    func createLabel(label: SKLabelNode, size: CGFloat, color: UIColor, pos: CGPoint)
+    {
+        label.fontName = font
+        label.fontSize = size
+        label.fontColor = color
+        label.position = pos
+        addChild(label)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
+    {
+        let gameScene = GameScene(size:view!.bounds.size)
+        view!.presentScene(gameScene)
     }
 }
