@@ -15,10 +15,15 @@ class GameScene: SKScene
     
     var gameTimer: Timer?
     var difficultyTimer: Timer?
+    var hitTimer: Timer?
     var enemySpawnRate: Double = 2
     
-    var player: SKSpriteNode!
+    let player = SKSpriteNode(imageNamed: "player")
     var chickenSize: CGFloat!
+    let playerTex = SKTexture(imageNamed: "player")
+    var playtex: SKAction!
+    let hitTex = SKTexture(imageNamed: "playerHit")
+    var hit: SKAction!
     
     var projectileSize: CGFloat!
     var impulse: CGVector!
@@ -74,9 +79,9 @@ class GameScene: SKScene
     
     func layoutScene()
     {
-        chickenSize = frame.size.width/5
-        projectileSize = frame.size.width/7
-        backgroundColor = UIColor(red: 44/255, green: 62/255, blue: 80/255, alpha: 1.0)
+        chickenSize = frame.size.width/5 - 10
+        projectileSize = frame.size.width/10
+        backgroundColor = UIColor(red: 65/255, green: 65/255, blue: 65/255, alpha: 1.0)
         
         createBoundaries() // Destroys projectiles and enemies once off screen
         
@@ -100,7 +105,10 @@ class GameScene: SKScene
     
     func createPlayer()
     {
-        player = SKSpriteNode(imageNamed: "player-1")
+        playtex = SKAction.setTexture(playerTex)
+        hit = SKAction.setTexture(hitTex)
+        player.run(playtex)
+        
         player.size = CGSize(width: chickenSize, height: chickenSize)
         player.position = CGPoint(x: frame.midX, y: frame.minY + chickenSize)
         
@@ -130,8 +138,8 @@ class GameScene: SKScene
     
     func spawnProjectile() // Should limit how many can be fired in a time frame?
     {
-        let projectile = SKSpriteNode(imageNamed: "cure-5")
-        projectile.size = CGSize(width: projectileSize, height: projectileSize)
+        let projectile = SKSpriteNode(imageNamed: "cure")
+        projectile.size = CGSize(width: projectileSize/3, height: projectileSize)
         projectile.position = player.position
         
         projectile.physicsBody = SKPhysicsBody(circleOfRadius: projectileSize/2)
@@ -147,6 +155,10 @@ class GameScene: SKScene
     
     func enemyCollision()
     {
+        player.run(hit)
+        
+        hitTimer = Timer.scheduledTimer(timeInterval: 0.3, target: self, selector: #selector(hitEffect), userInfo: nil, repeats: false)
+        
         playerLives -= 1
         updateLivesLabel()
         print ("ENEMY HIT PLAYER" + String(playerLives))
@@ -157,7 +169,12 @@ class GameScene: SKScene
         }
     }
     
-    func enemyCured()
+    @objc func hitEffect()
+    {
+        player.run(playtex)
+    }
+    
+    func enemyCured() // hit by cure projectile
     {
         print ("ENEMY CURED")
         updateScoreLabel(addScore: enemyPoints)
@@ -196,8 +213,8 @@ class GameScene: SKScene
             UserDefaults.standard.set(score, forKey: "Highscore")
         }
         
-        let menuScene = MenuScene(size: view!.bounds.size)
-        view!.presentScene(menuScene)
+        let endScreen = EndScreen(size: view!.bounds.size)
+        view!.presentScene(endScreen)
     }
 }
 
