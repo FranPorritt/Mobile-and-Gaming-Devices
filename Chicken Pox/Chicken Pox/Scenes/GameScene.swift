@@ -16,7 +16,7 @@ class GameScene: SKScene
     var gameTimer: Timer?
     var difficultyTimer: Timer?
     var hitTimer: Timer?
-    var enemySpawnRate: Double = 2
+    var enemySpawnRate: Double = 1.75
     
     let player = SKSpriteNode(imageNamed: "player")
     var chickenSize: CGFloat!
@@ -115,7 +115,10 @@ class GameScene: SKScene
         // Basic physics to recognise collisions with enemy -- no tilt control
         player.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
         player.physicsBody?.categoryBitMask = PhysicsCategories.playerCategory
+        player.physicsBody?.collisionBitMask = PhysicsCategories.boundaryCategory
         player.physicsBody?.isDynamic = false // Doesn't move -- temp until tilt implemented
+        player.physicsBody?.allowsRotation = false
+        player.physicsBody?.linearDamping = 0.5
         
         addChild(player)
     }
