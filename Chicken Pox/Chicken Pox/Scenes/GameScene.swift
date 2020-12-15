@@ -6,6 +6,7 @@
 //  Copyright © 2020 PORRITT, FRAN (Student). All rights reserved.
 //
 
+import CoreMotion
 import SpriteKit
 
 class GameScene: SKScene
@@ -35,12 +36,17 @@ class GameScene: SKScene
     let scoreLabel = SKLabelNode(text: "Score: 0")
     var enemyPoints: Int = 10
     
-    var font: String = "AvenirNext-Bold"
+    var font: String = "AvenirNext-Heavy"
+    
+    var motion: CMMotionManager!
+    var gyroTimer: Timer?
     
     override func didMove(to view: SKView)
     {
         setupPhysics()
         layoutScene()
+        //motion = CMMotionManager()
+        //startGyro()
     }
     
     func setupPhysics()
@@ -52,7 +58,7 @@ class GameScene: SKScene
     func createBoundaries()
     {
         //let top = CGRect(x: frame.minX, y: frame.maxY + 2, width: frame.width, height: 1)
-        topBoundary = SKSpriteNode(imageNamed: "boundary copy")
+        topBoundary = SKSpriteNode(imageNamed: "cure")
         topBoundary.size = CGSize(width: frame.width, height: 10)
         topBoundary.position = CGPoint(x: frame.midX, y: frame.maxY + (chickenSize * 2))
         topBoundary.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: topBoundary.size.width, height: topBoundary.size.height))
@@ -60,7 +66,7 @@ class GameScene: SKScene
         topBoundary.physicsBody?.isDynamic = false
         addChild(topBoundary)
         
-        bottomBoundary = SKSpriteNode(imageNamed: "boundary copy")
+        bottomBoundary = SKSpriteNode(imageNamed: "cure")
         bottomBoundary.size = CGSize(width: frame.width, height: 10)
         bottomBoundary.position = CGPoint(x: frame.midX, y: frame.minY - chickenSize)
         bottomBoundary.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: bottomBoundary.size.width, height: bottomBoundary.size.height))
@@ -93,6 +99,25 @@ class GameScene: SKScene
         increaseDifficulty()
         difficultyTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
     }
+   
+    /*func startGyro()
+    {
+        if motion.isGyroAvailable
+        {
+            self.motion.gyroUpdateInterval = 1.0/60.0
+            self.motion.startGyroUpdates()
+               
+            self.gyroTimer = Timer(fire: Date(), interval: (1.0/60.0), repeats: true, block: { (timer) in
+                   
+                if let data = self.motion.gyroData{
+                       let y = data.rotationRate.y
+                        self.playerMovement(gyroValue: y)
+                }
+            })
+               
+            RunLoop.current.add(self.gyroTimer!, forMode: RunLoop.Mode.default)
+        }
+    }*/
     
     func createLabel(label: SKLabelNode, size: CGFloat, color: UIColor, pos: CGPoint)
     {
@@ -121,6 +146,14 @@ class GameScene: SKScene
         player.physicsBody?.linearDamping = 0.5
         
         addChild(player)
+    }
+    
+    func playerMovement(gyroValue: Double)
+    {
+        //let tiltMove = CGFloat(gyroValue * 10)
+        let tiltMove = CGFloat(10)
+        let moveRight = SKAction.moveBy(x: tiltMove, y: 0, duration: 0.5)
+        player.run(moveRight)
     }
     
     @objc func spawnEnemy()

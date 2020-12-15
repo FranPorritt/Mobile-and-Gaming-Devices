@@ -14,7 +14,7 @@ class EndScreen: SKScene
     let playLabel = SKLabelNode(text: "Tap to play again!")
     let lastScoreLabel = SKLabelNode(text: "Score: " + "\(UserDefaults.standard.integer(forKey: "LastScore"))")
     let highscoreLabel = SKLabelNode(text: "Highscore: " + "\(UserDefaults.standard.integer(forKey: "Highscore"))")
-    var font: String = "AvenirNext-Bold"
+    var font: String = "AvenirNext-Heavy"
        
     override func didMove(to view: SKView)
     {
