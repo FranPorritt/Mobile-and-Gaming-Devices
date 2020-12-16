@@ -31,5 +31,14 @@ class GameViewController: UIViewController {
             
             //view.addSubview(gameScene.livesText)
         }
+        
+        let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressHappened))
+        view.addGestureRecognizer(recognizer)
+    }
+    
+    @objc func longPressHappened()
+    {
+        
+        gameScene.longPress()
     }
 }

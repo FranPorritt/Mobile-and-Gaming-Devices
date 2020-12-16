@@ -100,6 +100,13 @@ class GameScene: SKScene
         difficultyTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
     }
    
+    // Using long press to control movement - Considered tilting and swiping but neither work with the simulator
+    /*@objc func longPress()
+    {
+        print("Long press")
+    }*/
+    
+    // Started working on movement control based on user tilting the device - couldn't test due to mac access so it has not been finished.
     /*func startGyro()
     {
         if motion.isGyroAvailable
