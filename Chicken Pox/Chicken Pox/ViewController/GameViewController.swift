@@ -11,6 +11,7 @@ import SpriteKit
 
 class GameViewController: UIViewController {
 
+    var recognizer: UILongPressGestureRecognizer!
     var gameScene: GameScene = GameScene()
     
     override func viewDidLoad() {
@@ -31,14 +32,5 @@ class GameViewController: UIViewController {
             
             //view.addSubview(gameScene.livesText)
         }
-        
-        let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressHappened))
-        view.addGestureRecognizer(recognizer)
-    }
-    
-    @objc func longPressHappened()
-    {
-        
-        gameScene.longPress()
     }
 }

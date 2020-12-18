@@ -41,6 +41,13 @@ class GameScene: SKScene
     var motion: CMMotionManager!
     var gyroTimer: Timer?
     
+    let leftButton = SKSpriteNode()
+    let rightButton = SKSpriteNode()
+    
+    var touchedNode: SKNode!
+    var touching: Bool = false
+    var longPressing: Bool = false
+    
     override func didMove(to view: SKView)
     {
         setupPhysics()
@@ -94,17 +101,12 @@ class GameScene: SKScene
         createLabel(label: livesLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.minX + 70, y: frame.maxY - 50))
         createLabel(label: scoreLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.maxX - 70, y: frame.maxY - 50))
         
+        createButtons()
         createPlayer()
         
         increaseDifficulty()
         difficultyTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
     }
-   
-    // Using long press to control movement - Considered tilting and swiping but neither work with the simulator
-    /*@objc func longPress()
-    {
-        print("Long press")
-    }*/
     
     // Started working on movement control based on user tilting the device - couldn't test due to mac access so it has not been finished.
     /*func startGyro()
@@ -135,6 +137,18 @@ class GameScene: SKScene
         addChild(label)
     }
     
+    func createButtons()
+    {
+        leftButton.size = CGSize(width: frame.width/2, height: frame.width/2)
+        leftButton.position = CGPoint(x: frame.midX - frame.width/4, y: frame.minY + leftButton.size.height/2) // chickenSize so it's inline
+        
+        rightButton.size = CGSize(width: frame.width/2, height: frame.width/2)
+        rightButton.position = CGPoint(x: frame.midX + frame.width/4, y: frame.minY + rightButton.size.height/2) // chickenSize so it's inline
+        
+        addChild(leftButton)
+        addChild(rightButton)
+    }
+    
     func createPlayer()
     {
         playtex = SKAction.setTexture(playerTex)
@@ -142,7 +156,7 @@ class GameScene: SKScene
         player.run(playtex)
         
         player.size = CGSize(width: chickenSize, height: chickenSize)
-        player.position = CGPoint(x: frame.midX, y: frame.minY + chickenSize)
+        player.position = CGPoint(x: frame.midX, y: frame.minY + chickenSize * 2)
         
         // Basic physics to recognise collisions with enemy -- no tilt control
         player.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
@@ -155,12 +169,23 @@ class GameScene: SKScene
         addChild(player)
     }
     
-    func playerMovement(gyroValue: Double)
+    func move(direction: String)
     {
-        //let tiltMove = CGFloat(gyroValue * 10)
-        let tiltMove = CGFloat(10)
-        let moveRight = SKAction.moveBy(x: tiltMove, y: 0, duration: 0.5)
-        player.run(moveRight)
+        switch(direction)
+        {
+        case "left":
+            let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.5)
+            player.run(moveLeft)
+        break
+        
+        case "right":
+            let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.5)
+            player.run(moveRight)
+        break
+        
+        default:
+        break
+        }
     }
     
     @objc func spawnEnemy()
@@ -234,7 +259,42 @@ class GameScene: SKScene
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
     {
-        fire()
+        touching = true
+        for touch in touches
+        {
+            let location = touch.location(in:self)
+            touchedNode = atPoint(location)
+        
+            if touchedNode != leftButton && touchedNode != rightButton
+            {
+                fire()
+            }
+        }
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
+    {
+        print("Stopped touching")
+        touching = false
+        longPressing = false
+    }
+    
+    override func update(_ currentTime: TimeInterval)
+    {
+        if touching
+        {
+            print("CONTINOUS")
+            if touchedNode == leftButton
+            {
+                print("LEFT BUTTON TOUCH")
+                move(direction: "left")
+            }
+            else if touchedNode == rightButton
+            {
+                print("RIGHT BUTTON TOUCH")
+                move(direction: "right")
+            }
+        }
     }
     
     func updateLivesLabel()
