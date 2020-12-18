@@ -179,7 +179,7 @@ class GameScene: SKScene
         case "left":
             if player.position.x >= frame.minX + chickenSize * 1.5
             {
-            let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.5)
+            let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.2)
             player.run(moveLeft)
             }
         break
@@ -187,7 +187,7 @@ class GameScene: SKScene
         case "right":
             if player.position.x <= frame.maxX - chickenSize * 1.5
             {
-            let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.5)
+            let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.2)
             player.run(moveRight)
             }
         break
