@@ -41,12 +41,14 @@ class GameScene: SKScene
     var motion: CMMotionManager!
     var gyroTimer: Timer?
     
-    let leftButton = SKSpriteNode()
-    let rightButton = SKSpriteNode()
+    var leftButton: SKSpriteNode!
+    var rightButton: SKSpriteNode!
     
     var touchedNode: SKNode!
     var touching: Bool = false
-    var longPressing: Bool = false
+    
+    var canMoveLeft: Bool = true
+    var canMoveRight: Bool = true
     
     override func didMove(to view: SKView)
     {
@@ -64,8 +66,7 @@ class GameScene: SKScene
     
     func createBoundaries()
     {
-        //let top = CGRect(x: frame.minX, y: frame.maxY + 2, width: frame.width, height: 1)
-        topBoundary = SKSpriteNode(imageNamed: "cure")
+        topBoundary = SKSpriteNode()
         topBoundary.size = CGSize(width: frame.width, height: 10)
         topBoundary.position = CGPoint(x: frame.midX, y: frame.maxY + (chickenSize * 2))
         topBoundary.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: topBoundary.size.width, height: topBoundary.size.height))
@@ -73,7 +74,7 @@ class GameScene: SKScene
         topBoundary.physicsBody?.isDynamic = false
         addChild(topBoundary)
         
-        bottomBoundary = SKSpriteNode(imageNamed: "cure")
+        bottomBoundary = SKSpriteNode()
         bottomBoundary.size = CGSize(width: frame.width, height: 10)
         bottomBoundary.position = CGPoint(x: frame.midX, y: frame.minY - chickenSize)
         bottomBoundary.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: bottomBoundary.size.width, height: bottomBoundary.size.height))
@@ -139,11 +140,13 @@ class GameScene: SKScene
     
     func createButtons()
     {
-        leftButton.size = CGSize(width: frame.width/2, height: frame.width/2)
-        leftButton.position = CGPoint(x: frame.midX - frame.width/4, y: frame.minY + leftButton.size.height/2) // chickenSize so it's inline
+        leftButton =  SKSpriteNode(imageNamed: "button")
+        leftButton.size = CGSize(width: frame.width/2.5, height: frame.width/5)
+        leftButton.position = CGPoint(x: frame.midX - frame.width/4, y: frame.minY + leftButton.size.height)
         
-        rightButton.size = CGSize(width: frame.width/2, height: frame.width/2)
-        rightButton.position = CGPoint(x: frame.midX + frame.width/4, y: frame.minY + rightButton.size.height/2) // chickenSize so it's inline
+        rightButton =  SKSpriteNode(imageNamed: "button")
+        rightButton.size = CGSize(width: frame.width/2.5, height: frame.width/5)
+        rightButton.position = CGPoint(x: frame.midX + frame.width/4, y: frame.minY + rightButton.size.height)
         
         addChild(leftButton)
         addChild(rightButton)
@@ -156,12 +159,12 @@ class GameScene: SKScene
         player.run(playtex)
         
         player.size = CGSize(width: chickenSize, height: chickenSize)
-        player.position = CGPoint(x: frame.midX, y: frame.minY + chickenSize * 2)
+        player.position = CGPoint(x: frame.midX, y: frame.minY + chickenSize * 3)
         
         // Basic physics to recognise collisions with enemy -- no tilt control
         player.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
         player.physicsBody?.categoryBitMask = PhysicsCategories.playerCategory
-        player.physicsBody?.collisionBitMask = PhysicsCategories.boundaryCategory
+        player.physicsBody?.contactTestBitMask = PhysicsCategories.boundaryCategory
         player.physicsBody?.isDynamic = false // Doesn't move -- temp until tilt implemented
         player.physicsBody?.allowsRotation = false
         player.physicsBody?.linearDamping = 0.5
@@ -174,13 +177,19 @@ class GameScene: SKScene
         switch(direction)
         {
         case "left":
+            if player.position.x >= frame.minX + chickenSize * 1.5
+            {
             let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.5)
             player.run(moveLeft)
+            }
         break
         
         case "right":
+            if player.position.x <= frame.maxX - chickenSize * 1.5
+            {
             let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.5)
             player.run(moveRight)
+            }
         break
         
         default:
@@ -274,16 +283,13 @@ class GameScene: SKScene
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
     {
-        print("Stopped touching")
         touching = false
-        longPressing = false
     }
     
     override func update(_ currentTime: TimeInterval)
     {
         if touching
         {
-            print("CONTINOUS")
             if touchedNode == leftButton
             {
                 print("LEFT BUTTON TOUCH")
