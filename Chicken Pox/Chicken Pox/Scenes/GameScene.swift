@@ -13,11 +13,11 @@ class GameScene: SKScene
 {
     var topBoundary: SKSpriteNode!
     var bottomBoundary: SKSpriteNode!
-    var powerArea: SKSpriteNode!
     
     var gameTimer: Timer?
     var difficultyTimer: Timer?
     var hitTimer: Timer?
+    var powerTimer: Timer?
     var enemySpawnRate: Double = 1.75
         
     let player = SKSpriteNode(imageNamed: "player")
@@ -52,8 +52,7 @@ class GameScene: SKScene
     var canMoveRight: Bool = true
     
     var powerUses: Int = 3
-    var powerMoveActive: Bool = false
-    var shake: Bool = false
+    var powerLabel = SKLabelNode(text: "Power Moves: 3")
     
     override func didMove(to view: SKView)
     {
@@ -88,17 +87,6 @@ class GameScene: SKScene
         addChild(bottomBoundary)
     }
     
-    func createPowerArea()
-    {
-        powerArea = SKSpriteNode()
-        powerArea.size = CGSize(width: frame.width, height: frame.height)
-        powerArea.position = CGPoint(x: frame.midX, y: frame.midY)
-        powerArea.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: powerArea.size.width, height: powerArea.size.height))
-        powerArea.physicsBody?.categoryBitMask = PhysicsCategories.powerCategory
-        powerArea.physicsBody?.isDynamic = false
-        addChild(powerArea)
-    }
-    
     @objc func increaseDifficulty() // Increases enemy spawn rate every x seconds
     {
         gameTimer?.invalidate() // Stops timer and restarts each time the spawn rate is increased
@@ -114,10 +102,10 @@ class GameScene: SKScene
         backgroundColor = UIColor(red: 65/255, green: 65/255, blue: 65/255, alpha: 1.0)
         
         createBoundaries() // Destroys projectiles and enemies once off screen
-        createPowerArea()
         
-        createLabel(label: livesLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.minX + 70, y: frame.maxY - 50))
-        createLabel(label: scoreLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.maxX - 70, y: frame.maxY - 50))
+        createLabel(label: livesLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.minX + 70, y: frame.maxY - 50))
+        createLabel(label: scoreLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.maxX - 70, y: frame.maxY - 50))
+        createLabel(label: powerLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.maxY - 50))
         
         createButtons()
         createPlayer()
@@ -225,7 +213,7 @@ class GameScene: SKScene
         
         enemy.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
         enemy.physicsBody?.categoryBitMask = PhysicsCategories.enemyCategory
-        enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory | PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory | PhysicsCategories.powerCategory
+        enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory | PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
         enemy.physicsBody?.collisionBitMask = PhysicsCategories.none
         
         addChild(enemy)
@@ -286,17 +274,27 @@ class GameScene: SKScene
     
     func powerMove()
     {
+        powerTimer = Timer.scheduledTimer(timeInterval: 0.27, target: self, selector: #selector(resetBackground), userInfo: nil, repeats: false)
+        backgroundColor = UIColor(red: 173/255, green: 216/255, blue: 230/255, alpha: 1.0)
         powerUses -= 1
-        print("Power")
+        updatePowerLabel()
         
+        var points: Int = 0
         for child in self.children
         {
             if child.name == "enemy"
             {
                 child.removeFromParent()
+                points += enemyPoints * 2   // bonus points
             }
         }
-        print(powerUses)
+        
+        updateScoreLabel(addScore: points)
+    }
+    
+    @objc func resetBackground()
+    {
+        backgroundColor = UIColor(red: 65/255, green: 65/255, blue: 65/255, alpha: 1.0)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
@@ -347,6 +345,11 @@ class GameScene: SKScene
         scoreLabel.text = "Score: \(score)"
     }
     
+    func updatePowerLabel()
+    {
+        powerLabel.text = "Power Moves: \(powerUses)"
+    }
+    
     func gameOver()
     {
         UserDefaults.standard.set(score, forKey: "LastScore")
@@ -387,9 +390,5 @@ extension GameScene: SKPhysicsContactDelegate
         {
             contact.bodyB.node?.removeFromParent()
         }
-        /*else if contactMask == PhysicsCategories.powerCategory | PhysicsCategories.enemyCategory
-        {
-            powerMove()
-        }*/
     }
 }
