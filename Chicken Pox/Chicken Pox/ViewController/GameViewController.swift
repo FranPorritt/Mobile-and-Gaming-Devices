@@ -10,16 +10,16 @@ import UIKit
 import SpriteKit
 
 class GameViewController: UIViewController {
-
-    var recognizer: UILongPressGestureRecognizer!
-    var gameScene: GameScene = GameScene()
+    
+    var currentScene: GameScene!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         if let view = self.view as! SKView?
         {
-            let scene = MenuScene(size: view.bounds.size)
+            let scene = GameScene(size: view.bounds.size)
+            
             // Set the scale mode to scale to fit the window
             scene.scaleMode = .aspectFill
                 
@@ -30,7 +30,15 @@ class GameViewController: UIViewController {
             view.showsFPS = true
             view.showsNodeCount = true
             
-            //view.addSubview(gameScene.livesText)
+            currentScene = scene
+        }
+    }
+    
+    override func motionBegan(_ motion: UIEvent.EventSubtype, with event: UIEvent?)
+    {
+        if currentScene.powerUses > 0
+        {
+            currentScene.powerMove()
         }
     }
 }

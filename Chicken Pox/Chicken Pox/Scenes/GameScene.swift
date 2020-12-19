@@ -13,12 +13,13 @@ class GameScene: SKScene
 {
     var topBoundary: SKSpriteNode!
     var bottomBoundary: SKSpriteNode!
+    var powerArea: SKSpriteNode!
     
     var gameTimer: Timer?
     var difficultyTimer: Timer?
     var hitTimer: Timer?
     var enemySpawnRate: Double = 1.75
-    
+        
     let player = SKSpriteNode(imageNamed: "player")
     var chickenSize: CGFloat!
     let playerTex = SKTexture(imageNamed: "player")
@@ -49,6 +50,10 @@ class GameScene: SKScene
     
     var canMoveLeft: Bool = true
     var canMoveRight: Bool = true
+    
+    var powerUses: Int = 3
+    var powerMoveActive: Bool = false
+    var shake: Bool = false
     
     override func didMove(to view: SKView)
     {
@@ -83,6 +88,17 @@ class GameScene: SKScene
         addChild(bottomBoundary)
     }
     
+    func createPowerArea()
+    {
+        powerArea = SKSpriteNode()
+        powerArea.size = CGSize(width: frame.width, height: frame.height)
+        powerArea.position = CGPoint(x: frame.midX, y: frame.midY)
+        powerArea.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: powerArea.size.width, height: powerArea.size.height))
+        powerArea.physicsBody?.categoryBitMask = PhysicsCategories.powerCategory
+        powerArea.physicsBody?.isDynamic = false
+        addChild(powerArea)
+    }
+    
     @objc func increaseDifficulty() // Increases enemy spawn rate every x seconds
     {
         gameTimer?.invalidate() // Stops timer and restarts each time the spawn rate is increased
@@ -98,6 +114,7 @@ class GameScene: SKScene
         backgroundColor = UIColor(red: 65/255, green: 65/255, blue: 65/255, alpha: 1.0)
         
         createBoundaries() // Destroys projectiles and enemies once off screen
+        createPowerArea()
         
         createLabel(label: livesLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.minX + 70, y: frame.maxY - 50))
         createLabel(label: scoreLabel, size: 20.0, color: UIColor.white, pos: CGPoint(x: frame.maxX - 70, y: frame.maxY - 50))
@@ -200,6 +217,7 @@ class GameScene: SKScene
     @objc func spawnEnemy()
     {
         let enemy = SKSpriteNode(imageNamed: "zombie")
+        enemy.name = "enemy"
         enemy.size = CGSize(width: chickenSize, height: chickenSize)
         
         let randomPos = CGFloat.random(in: frame.minX + enemy.size.width/2 ... frame.maxX - enemy.size.width/2)
@@ -207,7 +225,7 @@ class GameScene: SKScene
         
         enemy.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
         enemy.physicsBody?.categoryBitMask = PhysicsCategories.enemyCategory
-        enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory | PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
+        enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory | PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory | PhysicsCategories.powerCategory
         enemy.physicsBody?.collisionBitMask = PhysicsCategories.none
         
         addChild(enemy)
@@ -264,6 +282,21 @@ class GameScene: SKScene
         spawnProjectile()
         // control ammo || cool down
         // need to despawn when off screen
+    }
+    
+    func powerMove()
+    {
+        powerUses -= 1
+        print("Power")
+        
+        for child in self.children
+        {
+            if child.name == "enemy"
+            {
+                child.removeFromParent()
+            }
+        }
+        print(powerUses)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
@@ -352,8 +385,11 @@ extension GameScene: SKPhysicsContactDelegate
         }
         else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.enemyCategory
         {
-            print ("ENEMY OFF SCREEN")
             contact.bodyB.node?.removeFromParent()
         }
+        /*else if contactMask == PhysicsCategories.powerCategory | PhysicsCategories.enemyCategory
+        {
+            powerMove()
+        }*/
     }
 }

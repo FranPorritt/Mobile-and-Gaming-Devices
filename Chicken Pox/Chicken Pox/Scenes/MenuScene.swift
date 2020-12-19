@@ -44,10 +44,4 @@ class MenuScene: SKScene
         label.position = pos
         addChild(label)
     }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
-    {
-        let gameScene = GameScene(size:view!.bounds.size)
-        view!.presentScene(gameScene)
-    }
 }
