@@ -18,6 +18,7 @@ class GameScene: SKScene
     var difficultyTimer: Timer?
     var hitTimer: Timer?
     var powerTimer: Timer?
+    var coolDownTimer: Timer?
     var enemySpawnRate: Double = 1.75
         
     let player = SKSpriteNode(imageNamed: "player")
@@ -26,9 +27,12 @@ class GameScene: SKScene
     var playtex: SKAction!
     let hitTex = SKTexture(imageNamed: "playerHit")
     var hit: SKAction!
+    var friendTex = SKTexture(imageNamed: "friend")
+    var friend: SKAction!
     
     var projectileSize: CGFloat!
     var impulse: CGVector!
+    var coolDown: Bool = false
     
     var playerLives: Int = 3
     let livesLabel = SKLabelNode(text: "Lives: 3")
@@ -38,9 +42,6 @@ class GameScene: SKScene
     var enemyPoints: Int = 10
     
     var font: String = "AvenirNext-Heavy"
-    
-    var motion: CMMotionManager!
-    var gyroTimer: Timer?
     
     var leftButton: SKSpriteNode!
     var rightButton: SKSpriteNode!
@@ -90,9 +91,9 @@ class GameScene: SKScene
     @objc func increaseDifficulty() // Increases enemy spawn rate every x seconds
     {
         gameTimer?.invalidate() // Stops timer and restarts each time the spawn rate is increased
-        gameTimer = Timer.scheduledTimer(timeInterval: enemySpawnRate, target: self, selector: #selector(spawnEnemy), userInfo: nil, repeats: true) //REMEMBER TO INVALIDATE WHEN DONE WITH IT
+        gameTimer = Timer.scheduledTimer(timeInterval: enemySpawnRate, target: self, selector: #selector(spawnEnemy), userInfo: nil, repeats: true)
         
-        enemySpawnRate -= 0.25
+        enemySpawnRate -= 0.25 // Decreases time between each enemy spawn
     }
     
     func layoutScene()
@@ -111,28 +112,8 @@ class GameScene: SKScene
         createPlayer()
         
         increaseDifficulty()
-        difficultyTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
+        difficultyTimer = Timer.scheduledTimer(timeInterval: 6, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
     }
-    
-    // Started working on movement control based on user tilting the device - couldn't test due to mac access so it has not been finished.
-    /*func startGyro()
-    {
-        if motion.isGyroAvailable
-        {
-            self.motion.gyroUpdateInterval = 1.0/60.0
-            self.motion.startGyroUpdates()
-               
-            self.gyroTimer = Timer(fire: Date(), interval: (1.0/60.0), repeats: true, block: { (timer) in
-                   
-                if let data = self.motion.gyroData{
-                       let y = data.rotationRate.y
-                        self.playerMovement(gyroValue: y)
-                }
-            })
-               
-            RunLoop.current.add(self.gyroTimer!, forMode: RunLoop.Mode.default)
-        }
-    }*/
     
     func createLabel(label: SKLabelNode, size: CGFloat, color: UIColor, pos: CGPoint)
     {
@@ -176,34 +157,11 @@ class GameScene: SKScene
         
         addChild(player)
     }
-    
-    func move(direction: String)
-    {
-        switch(direction)
-        {
-        case "left":
-            if player.position.x >= frame.minX + chickenSize * 1.5
-            {
-            let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.2)
-            player.run(moveLeft)
-            }
-        break
-        
-        case "right":
-            if player.position.x <= frame.maxX - chickenSize * 1.5
-            {
-            let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.2)
-            player.run(moveRight)
-            }
-        break
-        
-        default:
-        break
-        }
-    }
-    
+
     @objc func spawnEnemy()
     {
+        friend = SKAction.setTexture(friendTex)
+        
         let enemy = SKSpriteNode(imageNamed: "zombie")
         enemy.name = "enemy"
         enemy.size = CGSize(width: chickenSize, height: chickenSize)
@@ -265,19 +223,53 @@ class GameScene: SKScene
         // effects?
     }
     
+    func move(direction: String)
+    {
+        switch(direction)
+        {
+        case "left":
+            if player.position.x >= frame.minX + chickenSize * 1.5
+            {
+            let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.2)
+            player.run(moveLeft)
+            }
+        break
+        
+        case "right":
+            if player.position.x <= frame.maxX - chickenSize * 1.5
+            {
+            let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.2)
+            player.run(moveRight)
+            }
+        break
+        
+        default:
+        break
+        }
+    }
+    
     func fire()
     {
-        spawnProjectile()
-        // control ammo || cool down
-        // need to despawn when off screen
+        if !coolDown
+        {
+            spawnProjectile()
+            coolDown = true
+            coolDownTimer = Timer.scheduledTimer(timeInterval: 0.27, target: self, selector: #selector(resetCoolDown), userInfo: nil, repeats: false)
+        }
+    }
+    
+    @objc func resetCoolDown()
+    {
+        coolDown = false
     }
     
     func powerMove()
     {
-        powerTimer = Timer.scheduledTimer(timeInterval: 0.27, target: self, selector: #selector(resetBackground), userInfo: nil, repeats: false)
-        backgroundColor = UIColor(red: 173/255, green: 216/255, blue: 230/255, alpha: 1.0)
+        backgroundColor = UIColor(red: 120/255, green: 50/255, blue: 210/255, alpha: 0.7)
         powerUses -= 1
         updatePowerLabel()
+        
+        print("powerMove")
         
         var points: Int = 0
         for child in self.children
@@ -290,6 +282,7 @@ class GameScene: SKScene
         }
         
         updateScoreLabel(addScore: points)
+        powerTimer = Timer.scheduledTimer(timeInterval: 0.27, target: self, selector: #selector(resetBackground), userInfo: nil, repeats: false)
     }
     
     @objc func resetBackground()
@@ -323,12 +316,10 @@ class GameScene: SKScene
         {
             if touchedNode == leftButton
             {
-                print("LEFT BUTTON TOUCH")
                 move(direction: "left")
             }
             else if touchedNode == rightButton
             {
-                print("RIGHT BUTTON TOUCH")
                 move(direction: "right")
             }
         }
@@ -375,10 +366,18 @@ extension GameScene: SKPhysicsContactDelegate
         }
         else if contactMask == PhysicsCategories.enemyCategory | PhysicsCategories.projectileCategory
         {
-            // Destroys both projectile and enemy
-            contact.bodyA.node?.removeFromParent()
             contact.bodyB.node?.removeFromParent()
             
+            contact.bodyA.node?.run(friend)
+            contact.bodyA.node?.physicsBody?.categoryBitMask = PhysicsCategories.friendCategory
+            
+            var impulse = CGVector(dx: 60, dy: 0)
+            if (contact.bodyA.node?.position.x)! < frame.midX // On left of screen
+            {
+                impulse.dx = -60
+            }
+            contact.bodyA.node?.physicsBody?.applyImpulse(impulse)
+                      
             enemyCured() // add points
         }
         else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
@@ -387,6 +386,10 @@ extension GameScene: SKPhysicsContactDelegate
             contact.bodyB.node?.removeFromParent()
         }
         else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.enemyCategory
+        {
+            contact.bodyB.node?.removeFromParent()
+        }
+        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.friendCategory
         {
             contact.bodyB.node?.removeFromParent()
         }

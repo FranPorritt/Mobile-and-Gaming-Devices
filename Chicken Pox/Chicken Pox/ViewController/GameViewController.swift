@@ -39,6 +39,7 @@ class GameViewController: UIViewController {
         if currentScene.powerUses > 0
         {
             currentScene.powerMove()
+            print("POWER")
         }
     }
 }

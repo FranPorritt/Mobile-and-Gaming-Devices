@@ -1,5 +1,5 @@
 //
-//  MenuViewController.swift
+//  ControlViewController.swift
 //  Chicken Pox
 //
 //  Created by PORRITT, FRAN (Student) on 19/12/2020.
@@ -9,7 +9,7 @@
 import UIKit
 import SpriteKit
 
-class MenuViewController: UIViewController
+class ControlViewController: UIViewController
 {
     override func viewDidLoad()
     {
@@ -17,7 +17,7 @@ class MenuViewController: UIViewController
     
         if let view = self.view as! SKView?
         {
-            let scene = MenuScene(size: view.bounds.size)
+            let scene = ControlScene(size: view.bounds.size)
         
             // Set the scale mode to scale to fit the window
             scene.scaleMode = .aspectFill
@@ -31,13 +31,8 @@ class MenuViewController: UIViewController
         }
     }
     
-    @IBAction func loadGame(_ sender: Any)
+    @IBAction func menu()
     {
-        self.dismiss(animated: true, completion: nil) // deletes menu view controller to improve frames
+        self.dismiss(animated: true, completion: nil) // deletes view controller to improve frames
     }
-    
-    @IBAction func controls(_ sender: Any)
-      {
-          self.dismiss(animated: true, completion: nil) // deletes menu view controller to improve frames
-      }
 }

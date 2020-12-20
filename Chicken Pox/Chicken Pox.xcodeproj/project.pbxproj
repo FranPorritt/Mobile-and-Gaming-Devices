@@ -18,6 +18,8 @@
 		4161328C257BDC4600815690 /* EndScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4161328B257BDC4600815690 /* EndScreen.swift */; };
 		4193AD3A258EB5910051EC41 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4193AD39258EB5910051EC41 /* MenuViewController.swift */; };
 		41CF2327257BB9AA009395EA /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41CF2326257BB9AA009395EA /* MenuScene.swift */; };
+		41D8FFB4258FEAF5008BB88C /* ControlViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8FFB3258FEAF5008BB88C /* ControlViewController.swift */; };
+		41D8FFB6258FEB32008BB88C /* ControlScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D8FFB5258FEB32008BB88C /* ControlScene.swift */; };
 		41E4FA8E256191C60087F4A9 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E4FA8D256191C60087F4A9 /* Settings.swift */; };
 /* End PBXBuildFile section */
 
@@ -56,6 +58,8 @@
 		4161328B257BDC4600815690 /* EndScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndScreen.swift; sourceTree = "<group>"; };
 		4193AD39258EB5910051EC41 /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		41CF2326257BB9AA009395EA /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
+		41D8FFB3258FEAF5008BB88C /* ControlViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlViewController.swift; sourceTree = "<group>"; };
+		41D8FFB5258FEB32008BB88C /* ControlScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlScene.swift; sourceTree = "<group>"; };
 		41E4FA8D256191C60087F4A9 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -139,6 +143,7 @@
 			children = (
 				412021F2255FF40E008FBB3E /* GameViewController.swift */,
 				4193AD39258EB5910051EC41 /* MenuViewController.swift */,
+				41D8FFB3258FEAF5008BB88C /* ControlViewController.swift */,
 			);
 			path = ViewController;
 			sourceTree = "<group>";
@@ -149,6 +154,7 @@
 				412021F0255FF40E008FBB3E /* GameScene.swift */,
 				41CF2326257BB9AA009395EA /* MenuScene.swift */,
 				4161328B257BDC4600815690 /* EndScreen.swift */,
+				41D8FFB5258FEB32008BB88C /* ControlScene.swift */,
 			);
 			path = Scenes;
 			sourceTree = "<group>";
@@ -307,8 +313,10 @@
 				4161328C257BDC4600815690 /* EndScreen.swift in Sources */,
 				412021F3255FF40E008FBB3E /* GameViewController.swift in Sources */,
 				4193AD3A258EB5910051EC41 /* MenuViewController.swift in Sources */,
+				41D8FFB6258FEB32008BB88C /* ControlScene.swift in Sources */,
 				41CF2327257BB9AA009395EA /* MenuScene.swift in Sources */,
 				41E4FA8E256191C60087F4A9 /* Settings.swift in Sources */,
+				41D8FFB4258FEAF5008BB88C /* ControlViewController.swift in Sources */,
 				412021EB255FF40E008FBB3E /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

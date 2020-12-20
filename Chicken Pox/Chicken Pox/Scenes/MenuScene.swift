@@ -23,16 +23,15 @@ class MenuScene: SKScene
         addLogo()
         
         createLabel(label: titleLabel, size: 47.0, color: UIColor.red, pos: CGPoint(x: frame.midX, y: frame.maxY - titleLabel.frame.size.height * 4))
-        createLabel(label: playLabel, size: 40.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.minY + playLabel.frame.size.height * 6))
         createLabel(label: lastScoreLabel, size: 30.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.minY + lastScoreLabel.frame.size.height * 4))
         createLabel(label: highscoreLabel, size: 30.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.minY + highscoreLabel.frame.size.height * 2))
     }
     
     func addLogo()
     {
-        let logo = SKSpriteNode(imageNamed: "player")
+        let logo = SKSpriteNode(imageNamed: "zombie")
         logo.size = CGSize(width: frame.width/2, height: frame.width/2)
-        logo.position = CGPoint(x: frame.midX, y: frame.midY + 20)        
+        logo.position = CGPoint(x: frame.midX, y: frame.midY + 80)        
         addChild(logo)
     }
     
