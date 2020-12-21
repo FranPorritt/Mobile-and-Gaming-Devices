@@ -45,12 +45,8 @@ class GameScene: SKScene
     
     var leftButton: SKSpriteNode!
     var rightButton: SKSpriteNode!
-    
     var touchedNode: SKNode!
     var touching: Bool = false
-    
-    var canMoveLeft: Bool = true
-    var canMoveRight: Bool = true
     
     var powerUses: Int = 3
     var powerLabel = SKLabelNode(text: "Power Moves: 3")
@@ -160,7 +156,7 @@ class GameScene: SKScene
 
     @objc func spawnEnemy()
     {
-        friend = SKAction.setTexture(friendTex)
+       friend = SKAction.setTexture(friendTex)
         
         let enemy = SKSpriteNode(imageNamed: "zombie")
         enemy.name = "enemy"
@@ -228,7 +224,7 @@ class GameScene: SKScene
         switch(direction)
         {
         case "left":
-            if player.position.x >= frame.minX + chickenSize * 1.5
+            if player.position.x >= frame.minX + chickenSize
             {
             let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.2)
             player.run(moveLeft)
@@ -236,7 +232,7 @@ class GameScene: SKScene
         break
         
         case "right":
-            if player.position.x <= frame.maxX - chickenSize * 1.5
+            if player.position.x <= frame.maxX - chickenSize
             {
             let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.2)
             player.run(moveRight)
@@ -279,6 +275,11 @@ class GameScene: SKScene
                 child.removeFromParent()
                 points += enemyPoints * 2   // bonus points
             }
+        }
+        
+        if enemySpawnRate + 0.5 <= 1.75 // Less than initial rate
+        {
+            enemySpawnRate += 0.5 // Slows down enemy spawning so player isn't immediately overrun again
         }
         
         updateScoreLabel(addScore: points)
@@ -368,8 +369,8 @@ extension GameScene: SKPhysicsContactDelegate
         {
             contact.bodyB.node?.removeFromParent()
             
-            contact.bodyA.node?.run(friend)
-            contact.bodyA.node?.physicsBody?.categoryBitMask = PhysicsCategories.friendCategory
+            contact.bodyA.node?.run(friend) // Changes texture
+            contact.bodyA.node?.physicsBody?.categoryBitMask = PhysicsCategories.friendCategory // Won't damage player
             
             var impulse = CGVector(dx: 60, dy: 0)
             if (contact.bodyA.node?.position.x)! < frame.midX // On left of screen

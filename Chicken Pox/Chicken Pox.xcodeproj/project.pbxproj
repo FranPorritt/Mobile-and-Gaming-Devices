@@ -111,6 +111,7 @@
 		412021E9255FF40E008FBB3E /* Chicken Pox */ = {
 			isa = PBXGroup;
 			children = (
+				416C365B2590CB2000686781 /* Classes */,
 				412021FC255FF410008FBB3E /* Info.plist */,
 				41202221255FF7EC008FBB3E /* Assets */,
 				41202220255FF7E5008FBB3E /* Template */,
@@ -176,6 +177,13 @@
 				412021F9255FF410008FBB3E /* LaunchScreen.storyboard */,
 			);
 			path = Assets;
+			sourceTree = "<group>";
+		};
+		416C365B2590CB2000686781 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Classes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
