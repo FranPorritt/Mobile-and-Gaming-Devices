@@ -38,6 +38,6 @@ class MenuViewController: UIViewController
     
     @IBAction func controls(_ sender: Any)
       {
-          self.dismiss(animated: true, completion: nil) // deletes menu view controller to improve frames
+          //self.dismiss(animated: true, completion: nil) // deletes menu view controller to improve frames
       }
 }

@@ -19,6 +19,7 @@ class GameScene: SKScene
     var hitTimer: Timer?
     var powerTimer: Timer?
     var coolDownTimer: Timer?
+    var scoreTimer: Timer?
     var enemySpawnRate: Double = 1.75
         
     let player = SKSpriteNode(imageNamed: "player")
@@ -109,6 +110,12 @@ class GameScene: SKScene
         
         increaseDifficulty()
         difficultyTimer = Timer.scheduledTimer(timeInterval: 6, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
+        scoreTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(addTimeScore), userInfo: nil, repeats: true)
+    }
+    
+    @objc func addTimeScore()
+    {
+        updateScoreLabel(addScore: 10)
     }
     
     func createLabel(label: SKLabelNode, size: CGFloat, color: UIColor, pos: CGPoint)
