@@ -12,6 +12,7 @@ import SpriteKit
 class GameViewController: UIViewController {
     
     var currentScene: GameScene!
+    var deadTimer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +31,7 @@ class GameViewController: UIViewController {
             view.showsFPS = true
             view.showsNodeCount = true
             
+            NotificationCenter.default.addObserver(self, selector: #selector(gameOver), name: NSNotification.Name(rawValue: "GameOver"), object: nil)
             currentScene = scene
         }
     }
@@ -40,6 +42,31 @@ class GameViewController: UIViewController {
         {
             currentScene.powerMove()
             print("POWER")
+        }
+    }
+    
+    @objc func gameOver(notification: NSNotification)
+    {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func pause()
+    {
+        currentScene.view?.isPaused = !currentScene.view!.isPaused
+        currentScene.controlTimers(state: currentScene.view!.isPaused)
+    }
+    
+    @IBAction func switchClicked(_ sender: UISwitch)
+    {
+        if sender.isOn // Hard mode - Faster spawning, longer cool down
+        {
+            currentScene.difficultyRate = 0.2
+            currentScene.coolDownRate = 0.4
+        }
+        else
+        {
+            currentScene.difficultyRate = 0.1
+            currentScene.coolDownRate = 0.15
         }
     }
 }

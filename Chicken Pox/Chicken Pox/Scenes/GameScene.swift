@@ -20,7 +20,12 @@ class GameScene: SKScene
     var powerTimer: Timer?
     var coolDownTimer: Timer?
     var scoreTimer: Timer?
+    var spawnPowerUpTimer: Timer?
+    var invincibleTimer: Timer?
+    
     var enemySpawnRate: Double = 1.75
+    var difficultyRate: Double = 0.1
+    var coolDownRate: Double = 0.15
         
     let player = SKSpriteNode(imageNamed: "player")
     var chickenSize: CGFloat!
@@ -30,6 +35,8 @@ class GameScene: SKScene
     var hit: SKAction!
     var friendTex = SKTexture(imageNamed: "friend")
     var friend: SKAction!
+    var shieldTex = SKTexture(imageNamed: "playerShield")
+    var shield: SKAction!
     
     var projectileSize: CGFloat!
     var impulse: CGVector!
@@ -51,6 +58,8 @@ class GameScene: SKScene
     
     var powerUses: Int = 3
     var powerLabel = SKLabelNode(text: "Power Moves: 3")
+    
+    var timerArray = [Timer]()
     
     override func didMove(to view: SKView)
     {
@@ -88,9 +97,16 @@ class GameScene: SKScene
     @objc func increaseDifficulty() // Increases enemy spawn rate every x seconds
     {
         gameTimer?.invalidate() // Stops timer and restarts each time the spawn rate is increased
+        
+        if !view!.isPaused // If game isn't paused
+        {
         gameTimer = Timer.scheduledTimer(timeInterval: enemySpawnRate, target: self, selector: #selector(spawnEnemy), userInfo: nil, repeats: true)
         
-        enemySpawnRate -= 0.25 // Decreases time between each enemy spawn
+            if enemySpawnRate >= 0.4
+            {
+                enemySpawnRate -= difficultyRate // Decreases time between each enemy spawn
+            }
+        }
     }
     
     func layoutScene()
@@ -101,21 +117,63 @@ class GameScene: SKScene
         
         createBoundaries() // Destroys projectiles and enemies once off screen
         
-        createLabel(label: livesLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.minX + 70, y: frame.maxY - 50))
-        createLabel(label: scoreLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.maxX - 70, y: frame.maxY - 50))
-        createLabel(label: powerLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.maxY - 50))
+        createLabel(label: livesLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.minX + 70, y: frame.maxY - 70))
+        createLabel(label: scoreLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.maxX - 70, y: frame.maxY - 70))
+        createLabel(label: powerLabel, size: 17.0, color: UIColor.white, pos: CGPoint(x: frame.midX, y: frame.maxY - 70))
         
         createButtons()
         createPlayer()
         
         increaseDifficulty()
-        difficultyTimer = Timer.scheduledTimer(timeInterval: 6, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
+        createTimers()
+    }
+    
+    func createTimers()
+    {
+        timerArray.removeAll()
+        
+        if enemySpawnRate >= 0.4 // Not needed once ideal spawn rate is reached
+        {
+            difficultyTimer = Timer.scheduledTimer(timeInterval: 6, target: self, selector: #selector(increaseDifficulty), userInfo: nil, repeats: true)
+            difficultyTimer?.tolerance = difficultyTimer!.timeInterval * 0.1 // Sets tolerance to 10%
+        }
+               
         scoreTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(addTimeScore), userInfo: nil, repeats: true)
+        scoreTimer?.tolerance = scoreTimer!.timeInterval * 0.1
+               
+        spawnPowerUpTimer = Timer.scheduledTimer(timeInterval: 12, target: self, selector: #selector(spawnInvincibilty), userInfo: nil, repeats: true)
+        spawnPowerUpTimer?.tolerance = spawnPowerUpTimer!.timeInterval * 0.1
+        
+        timerArray.append(difficultyTimer!)
+        timerArray.append(scoreTimer!)
+        timerArray.append(spawnPowerUpTimer!)
     }
     
     @objc func addTimeScore()
     {
-        updateScoreLabel(addScore: 10)
+        if !view!.isPaused // If game isn't paused
+        {
+            updateScoreLabel(addScore: 10)
+        }
+    }
+    
+    func controlTimers(state: Bool)
+    {
+        switch state
+        {
+        case true:
+            for timer in timerArray
+            {
+                timer.invalidate()
+            }
+            timerArray.removeAll()
+            break
+            
+        case false:
+            createTimers()
+            break
+            
+        }
     }
     
     func createLabel(label: SKLabelNode, size: CGFloat, color: UIColor, pos: CGPoint)
@@ -131,11 +189,11 @@ class GameScene: SKScene
     {
         leftButton =  SKSpriteNode(imageNamed: "button")
         leftButton.size = CGSize(width: frame.width/2.5, height: frame.width/5)
-        leftButton.position = CGPoint(x: frame.midX - frame.width/4, y: frame.minY + leftButton.size.height)
+        leftButton.position = CGPoint(x: frame.midX - frame.width/4, y: frame.minY + leftButton.size.height * 1.25)
         
         rightButton =  SKSpriteNode(imageNamed: "button")
         rightButton.size = CGSize(width: frame.width/2.5, height: frame.width/5)
-        rightButton.position = CGPoint(x: frame.midX + frame.width/4, y: frame.minY + rightButton.size.height)
+        rightButton.position = CGPoint(x: frame.midX + frame.width/4, y: frame.minY + rightButton.size.height * 1.25)
         
         addChild(leftButton)
         addChild(rightButton)
@@ -145,6 +203,7 @@ class GameScene: SKScene
     {
         playtex = SKAction.setTexture(playerTex)
         hit = SKAction.setTexture(hitTex)
+        shield = SKAction.setTexture(shieldTex)
         player.run(playtex)
         
         player.size = CGSize(width: chickenSize, height: chickenSize)
@@ -163,21 +222,24 @@ class GameScene: SKScene
 
     @objc func spawnEnemy()
     {
-       friend = SKAction.setTexture(friendTex)
+        if !view!.isPaused // If game isn't paused
+        {
+            friend = SKAction.setTexture(friendTex)
         
-        let enemy = SKSpriteNode(imageNamed: "zombie")
-        enemy.name = "enemy"
-        enemy.size = CGSize(width: chickenSize, height: chickenSize)
+            let enemy = SKSpriteNode(imageNamed: "zombie")
+            enemy.name = "enemy"
+            enemy.size = CGSize(width: chickenSize, height: chickenSize)
         
-        let randomPos = CGFloat.random(in: frame.minX + enemy.size.width/2 ... frame.maxX - enemy.size.width/2)
-        enemy.position = CGPoint(x: randomPos, y: frame.maxY + chickenSize) // spawns just off screen
+            let randomPos = CGFloat.random(in: frame.minX + enemy.size.width/2 ... frame.maxX - enemy.size.width/2)
+            enemy.position = CGPoint(x: randomPos, y: frame.maxY + chickenSize) // spawns just off screen
         
-        enemy.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
-        enemy.physicsBody?.categoryBitMask = PhysicsCategories.enemyCategory
-        enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory | PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
-        enemy.physicsBody?.collisionBitMask = PhysicsCategories.none
+            enemy.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize/2)
+            enemy.physicsBody?.categoryBitMask = PhysicsCategories.enemyCategory
+            enemy.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory | PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
+            enemy.physicsBody?.collisionBitMask = PhysicsCategories.none
         
-        addChild(enemy)
+            addChild(enemy)
+        }
     }
     
     func spawnProjectile() // Should limit how many can be fired in a time frame?
@@ -186,15 +248,32 @@ class GameScene: SKScene
         projectile.size = CGSize(width: projectileSize/3, height: projectileSize)
         projectile.position = player.position
         
-        projectile.physicsBody = SKPhysicsBody(circleOfRadius: projectileSize/2)
+        projectile.physicsBody = SKPhysicsBody(circleOfRadius: projectileSize/3)
         projectile.physicsBody?.categoryBitMask = PhysicsCategories.projectileCategory
         projectile.physicsBody?.contactTestBitMask = PhysicsCategories.enemyCategory | PhysicsCategories.boundaryCategory
+        projectile.physicsBody?.collisionBitMask = PhysicsCategories.none
         projectile.physicsBody?.affectedByGravity = false // goes up screen rather than down
         
         addChild(projectile)
         
-        impulse = CGVector(dx: 0, dy: 60)
+        impulse = CGVector(dx: 0, dy: 30)
         projectile.physicsBody?.applyImpulse(impulse)
+    }
+    
+    @objc func spawnInvincibilty()
+    {
+        let invincible = SKSpriteNode(imageNamed: "shield")
+        invincible.size = CGSize(width: chickenSize, height: chickenSize)
+        
+        let randomPos = CGFloat.random(in: frame.minX + invincible.size.width/2 ... frame.maxX - invincible.size.width/2)
+        invincible.position = CGPoint(x: randomPos, y: frame.maxY + chickenSize) // spawns just off screen
+        
+        invincible.physicsBody = SKPhysicsBody(circleOfRadius: chickenSize)
+        invincible.physicsBody?.categoryBitMask = PhysicsCategories.invincibleCategory
+        invincible.physicsBody?.contactTestBitMask = PhysicsCategories.playerCategory
+        invincible.physicsBody?.collisionBitMask = PhysicsCategories.none
+        
+        addChild(invincible)
     }
     
     func enemyCollision()
@@ -205,7 +284,6 @@ class GameScene: SKScene
         
         playerLives -= 1
         updateLivesLabel()
-        print ("ENEMY HIT PLAYER" + String(playerLives))
         
         if playerLives == 0
         {
@@ -216,14 +294,12 @@ class GameScene: SKScene
     @objc func hitEffect()
     {
         player.run(playtex)
+        hitTimer?.invalidate()
     }
     
     func enemyCured() // hit by cure projectile
     {
-        print ("ENEMY CURED")
         updateScoreLabel(addScore: enemyPoints)
-        // points
-        // effects?
     }
     
     func move(direction: String)
@@ -255,15 +331,19 @@ class GameScene: SKScene
     {
         if !coolDown
         {
-            spawnProjectile()
-            coolDown = true
-            coolDownTimer = Timer.scheduledTimer(timeInterval: 0.27, target: self, selector: #selector(resetCoolDown), userInfo: nil, repeats: false)
+            if !view!.isPaused // If game isn't paused
+            {
+                spawnProjectile()
+                coolDown = true
+                coolDownTimer = Timer.scheduledTimer(timeInterval: coolDownRate, target: self, selector: #selector(resetCoolDown), userInfo: nil, repeats: false)
+            }
         }
     }
     
     @objc func resetCoolDown()
     {
         coolDown = false
+        coolDownTimer?.invalidate()
     }
     
     func powerMove()
@@ -271,8 +351,6 @@ class GameScene: SKScene
         backgroundColor = UIColor(red: 120/255, green: 50/255, blue: 210/255, alpha: 0.7)
         powerUses -= 1
         updatePowerLabel()
-        
-        print("powerMove")
         
         var points: Int = 0
         for child in self.children
@@ -296,6 +374,21 @@ class GameScene: SKScene
     @objc func resetBackground()
     {
         backgroundColor = UIColor(red: 65/255, green: 65/255, blue: 65/255, alpha: 1.0)
+        powerTimer?.invalidate()
+    }
+    
+    func invincible()
+    {
+        player.physicsBody?.categoryBitMask = PhysicsCategories.none
+        player.run(shield)
+        invincibleTimer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(stopInvincible), userInfo: nil, repeats: false)
+    }
+    
+    @objc func stopInvincible()
+    {
+        player.physicsBody?.categoryBitMask = PhysicsCategories.playerCategory
+        player.run(playtex)
+        invincibleTimer?.invalidate()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
@@ -357,8 +450,21 @@ class GameScene: SKScene
             UserDefaults.standard.set(score, forKey: "Highscore")
         }
         
-        let endScreen = EndScreen(size: view!.bounds.size)
-        view!.presentScene(endScreen)
+        for timer in timerArray
+        {
+            timer.invalidate()
+        }
+        gameTimer?.invalidate()
+        
+        let deadLabel = SKLabelNode(text: "YOU DIED!")
+        createLabel(label: deadLabel, size: 65, color: UIColor.red, pos: CGPoint(x: frame.midX, y: frame.midY))
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(2))
+        {
+            NotificationCenter.default.post(name: NSNotification.Name("GameOver"), object: nil)
+        }
+        
+        view?.isPaused = true
     }
 }
 
@@ -368,11 +474,11 @@ extension GameScene: SKPhysicsContactDelegate
     {
         let contactMask = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
         
-        if contactMask == PhysicsCategories.enemyCategory | PhysicsCategories.playerCategory
+        if contactMask == PhysicsCategories.enemyCategory | PhysicsCategories.playerCategory  // ENEMY COLLISION
         {
             enemyCollision()
         }
-        else if contactMask == PhysicsCategories.enemyCategory | PhysicsCategories.projectileCategory
+        else if contactMask == PhysicsCategories.enemyCategory | PhysicsCategories.projectileCategory // PROJECTILE HIT ENEMY
         {
             contact.bodyB.node?.removeFromParent()
             
@@ -388,17 +494,25 @@ extension GameScene: SKPhysicsContactDelegate
                       
             enemyCured() // add points
         }
-        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory
-        {
-            print ("PROJECTILE OFF SCREEN")
-            contact.bodyB.node?.removeFromParent()
-        }
-        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.enemyCategory
+        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.projectileCategory // PROJECTILE OFF SCREEN
         {
             contact.bodyB.node?.removeFromParent()
         }
-        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.friendCategory
+        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.enemyCategory // ENEMY OFF SCREEN
         {
+            contact.bodyB.node?.removeFromParent()
+        }
+        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.friendCategory // FRIEND OFF SCREEN
+        {
+            contact.bodyB.node?.removeFromParent()
+        }
+        else if contactMask == PhysicsCategories.boundaryCategory | PhysicsCategories.invincibleCategory // POWER UP OFF SCREEN
+        {
+            contact.bodyB.node?.removeFromParent()
+        }
+        else if contactMask == PhysicsCategories.playerCategory | PhysicsCategories.invincibleCategory // POWER UP COLLECTED
+        {
+            invincible()
             contact.bodyB.node?.removeFromParent()
         }
     }
