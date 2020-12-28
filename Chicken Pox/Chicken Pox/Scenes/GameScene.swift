@@ -100,11 +100,18 @@ class GameScene: SKScene
         
         if !view!.isPaused // If game isn't paused
         {
-        gameTimer = Timer.scheduledTimer(timeInterval: enemySpawnRate, target: self, selector: #selector(spawnEnemy), userInfo: nil, repeats: true)
+            gameTimer = Timer.scheduledTimer(timeInterval: enemySpawnRate, target: self, selector: #selector(spawnEnemy), userInfo: nil, repeats: true)
         
             if enemySpawnRate >= 0.4
             {
-                enemySpawnRate -= difficultyRate // Decreases time between each enemy spawn
+                if enemySpawnRate <= 0.6
+                {
+                    enemySpawnRate -= difficultyRate / 2 // Slows down slightly so it's not suddenly very crowded
+                }
+                else
+                {
+                    enemySpawnRate -= difficultyRate // Decreases time between each enemy spawn
+                }
             }
         }
     }
@@ -357,12 +364,16 @@ class GameScene: SKScene
         {
             if child.name == "enemy"
             {
-                child.removeFromParent()
+                child.physicsBody?.categoryBitMask = PhysicsCategories.friendCategory
+                child.run(friend)
+                let impulse = CGVector(dx: CGFloat.random(in: -60 ... 60), dy: CGFloat.random(in: -60 ... 60))
+                child.physicsBody?.applyImpulse(impulse)
+                
                 points += enemyPoints * 2   // bonus points
             }
         }
         
-        if enemySpawnRate + 0.5 <= 1.75 // Less than initial rate
+        if enemySpawnRate + 0.5 <= 1.3 // Less than initial rate
         {
             enemySpawnRate += 0.5 // Slows down enemy spawning so player isn't immediately overrun again
         }
