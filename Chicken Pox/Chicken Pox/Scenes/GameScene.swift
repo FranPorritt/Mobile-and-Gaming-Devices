@@ -106,7 +106,7 @@ class GameScene: SKScene
             {
                 if enemySpawnRate <= 0.6
                 {
-                    enemySpawnRate -= difficultyRate / 2 // Slows down slightly so it's not suddenly very crowded
+                    enemySpawnRate -= difficultyRate / 2 // Slows down slightly so loads don't suddenly start spawning
                 }
                 else
                 {
@@ -222,14 +222,14 @@ class GameScene: SKScene
         player.physicsBody?.contactTestBitMask = PhysicsCategories.boundaryCategory
         player.physicsBody?.isDynamic = false // Doesn't move -- temp until tilt implemented
         player.physicsBody?.allowsRotation = false
-        player.physicsBody?.linearDamping = 0.5
+        //player.physicsBody?.linearDamping = 0.5
         
         addChild(player)
     }
 
     @objc func spawnEnemy()
     {
-        if !view!.isPaused // If game isn't paused
+        if !view!.isPaused // Won't spawn any while game is paused (timers don't pause)
         {
             friend = SKAction.setTexture(friendTex)
         
@@ -249,7 +249,7 @@ class GameScene: SKScene
         }
     }
     
-    func spawnProjectile() // Should limit how many can be fired in a time frame?
+    func spawnProjectile()
     {
         let projectile = SKSpriteNode(imageNamed: "cure")
         projectile.size = CGSize(width: projectileSize/3, height: projectileSize)
@@ -267,7 +267,7 @@ class GameScene: SKScene
         projectile.physicsBody?.applyImpulse(impulse)
     }
     
-    @objc func spawnInvincibilty()
+    @objc func spawnInvincibilty() // Power up
     {
         let invincible = SKSpriteNode(imageNamed: "shield")
         invincible.size = CGSize(width: chickenSize, height: chickenSize)
@@ -283,7 +283,7 @@ class GameScene: SKScene
         addChild(invincible)
     }
     
-    func enemyCollision()
+    func enemyCollision() // Removes player life and swaps textures
     {
         player.run(hit)
         
@@ -314,10 +314,10 @@ class GameScene: SKScene
         switch(direction)
         {
         case "left":
-            if player.position.x >= frame.minX + chickenSize
+            if player.position.x >= frame.minX + chickenSize // Edge of screen
             {
-            let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.2)
-            player.run(moveLeft)
+                let moveLeft = SKAction.moveBy(x: -10, y: 0, duration: 0.2)
+                player.run(moveLeft)
             }
         break
         
@@ -325,7 +325,7 @@ class GameScene: SKScene
             if player.position.x <= frame.maxX - chickenSize
             {
             let moveRight = SKAction.moveBy(x: 10, y: 0, duration: 0.2)
-            player.run(moveRight)
+                player.run(moveRight)
             }
         break
         
@@ -338,7 +338,7 @@ class GameScene: SKScene
     {
         if !coolDown
         {
-            if !view!.isPaused // If game isn't paused
+            if !view!.isPaused // Stops projectiles spawning after game is resumed
             {
                 spawnProjectile()
                 coolDown = true
@@ -362,7 +362,7 @@ class GameScene: SKScene
         var points: Int = 0
         for child in self.children
         {
-            if child.name == "enemy"
+            if child.name == "enemy" // Scatters enemies across screen and cures them
             {
                 child.physicsBody?.categoryBitMask = PhysicsCategories.friendCategory
                 child.run(friend)
@@ -388,7 +388,7 @@ class GameScene: SKScene
         powerTimer?.invalidate()
     }
     
-    func invincible()
+    func invincible() // Stops collisions being detected
     {
         player.physicsBody?.categoryBitMask = PhysicsCategories.none
         player.run(shield)
@@ -410,7 +410,7 @@ class GameScene: SKScene
             let location = touch.location(in:self)
             touchedNode = atPoint(location)
         
-            if touchedNode != leftButton && touchedNode != rightButton
+            if touchedNode != leftButton && touchedNode != rightButton // Checks if movement buttons are being pressed
             {
                 fire()
             }
@@ -424,7 +424,7 @@ class GameScene: SKScene
     
     override func update(_ currentTime: TimeInterval)
     {
-        if touching
+        if touching // Registers long presses and moves player for as long as it is held down
         {
             if touchedNode == leftButton
             {
